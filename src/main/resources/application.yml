@@ -53,9 +53,14 @@ logging:
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{correlationId}] [%thread] %logger{15} - %msg%n"
   
   # 로그 파일 설정
+  logback:
+    rollingpolicy:
+      file-name-pattern: logs/api-gateway-%d{yyyy-MM-dd}.%i.log
+      max-file-size: 10MB
+      max-history: 30    # 30일이 지난 로그 파일 삭제
+#      total-size-cap: 3GB # 전체 로그 파일 크기 제한
+      clean-history-on-start: true # 애플리케이션 시작 시 오래된 로그 파일 정리
+
+    # 로그 파일 경로 (새로운 방식)
   file:
-    # 로그 파일 경로 (옵션)
     name: logs/api-gateway.log
-    # 로그 파일 최대 크기 및 보관 설정
-    max-size: 10MB
-    max-history: 30

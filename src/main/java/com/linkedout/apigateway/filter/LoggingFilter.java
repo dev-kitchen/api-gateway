@@ -14,6 +14,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -22,15 +23,14 @@ import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 모든 요청과 응답을 로깅하는 글로벌 필터
- * 
+ * <p>
  * 이 필터는 API Gateway로 들어오는 모든 요청과 나가는 모든 응답을 가로채어 로깅합니다.
  * 요청 URL, 메서드, 헤더, 본문과 응답 상태 코드, 헤더, 본문을 로그로 남깁니다.
  * 디버깅 및 모니터링 목적으로 사용됩니다.
- * 
+ * <p>
  * {@code @Component}: 
  *    - Spring이 이 클래스를 컴포넌트로 인식하고 Bean으로 등록하도록 함
  */
@@ -53,7 +53,8 @@ public class LoggingFilter implements GlobalFilter, Ordered {
 		}};
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    @NonNull
+    public Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull GatewayFilterChain chain) {
         // 원본 요청과 응답
         ServerHttpRequest originalRequest = exchange.getRequest();
         ServerHttpResponse originalResponse = exchange.getResponse();
@@ -63,9 +64,11 @@ public class LoggingFilter implements GlobalFilter, Ordered {
         String requestMethod = originalRequest.getMethod().name();
         String requestId = exchange.getRequest().getId();
         
-        // 요청 시작 로깅
-        logger.info(">>> 요청 시작: {} {} (ID: {})", requestMethod, requestPath, requestId);
-        logger.info(">>> 요청 헤더: {}", originalRequest.getHeaders());
+        // 요청 정보 통합 로깅 (중복 제거)
+        if (logger.isInfoEnabled()) {
+            logger.info(">>> 요청: {} {} (ID: {}), 헤더: {}", 
+                requestMethod, requestPath, requestId, originalRequest.getHeaders());
+        }
         
         // 요청 본문 로깅 여부 결정
         boolean shouldLogRequestBody = shouldLogBody(originalRequest.getHeaders().getContentType());
@@ -73,18 +76,37 @@ public class LoggingFilter implements GlobalFilter, Ordered {
         if (!shouldLogRequestBody) {
             logger.info(">>> 요청 본문: [바이너리 데이터 - 로깅 생략]");
             return chain.filter(exchange).then(Mono.fromRunnable(() -> {
-                logger.info("<<< 응답 상태: {}", originalResponse.getStatusCode());
-                logger.info("<<< 응답 헤더: {}", originalResponse.getHeaders());
-                logger.info("<<< 응답 본문: [바이너리 데이터 또는 스트리밍 데이터 - 로깅 생략]");
-                logger.info("<<< 요청 종료: {} {} (ID: {})", requestMethod, requestPath, requestId);
+                if (logger.isInfoEnabled()) {
+                    logger.info("<<< 응답: {} {} (ID: {}), 상태: {}, 헤더: {}, 본문: [바이너리/스트리밍 데이터]",
+                        requestMethod, requestPath, requestId, 
+                        originalResponse.getStatusCode(), originalResponse.getHeaders());
+                }
             }));
         }
         
-        // 요청 본문 로깅
-        AtomicReference<String> requestBodyRef = new AtomicReference<>();
+        // 요청 및 응답 데코레이터 생성
+        ServerHttpRequestDecorator requestDecorator = createRequestDecorator(originalRequest);
+        ServerHttpResponseDecorator responseDecorator = createResponseDecorator(
+            originalResponse, requestMethod, requestPath, requestId);
         
-        ServerHttpRequestDecorator requestDecorator = new ServerHttpRequestDecorator(originalRequest) {
+        // 데코레이트된 요청과 응답으로 교체된 ServerWebExchange 생성
+        ServerWebExchange decoratedExchange = exchange.mutate()
+            .request(requestDecorator)
+            .response(responseDecorator)
+            .build();
+        
+        // 필터 체인 계속 진행
+        return chain.filter(decoratedExchange);
+    }
+    
+    /**
+     * 요청 본문을 로깅하는 요청 데코레이터 생성
+     */
+    @NonNull
+    private ServerHttpRequestDecorator createRequestDecorator(@NonNull ServerHttpRequest originalRequest) {
+        return new ServerHttpRequestDecorator(originalRequest) {
             @Override
+            @NonNull
             public Flux<DataBuffer> getBody() {
                 return super.getBody().doOnNext(dataBuffer -> {
                     // 요청 본문 캡처
@@ -92,18 +114,28 @@ public class LoggingFilter implements GlobalFilter, Ordered {
                     dataBuffer.read(content);
                     // 버퍼를 소비했으므로 복제본 생성
                     DataBufferUtils.retain(dataBuffer);
-                    // 요청 본문을 문자열로 변환하여 저장
+                    // 요청 본문을 문자열로 변환하여 로깅
                     String bodyStr = new String(content, StandardCharsets.UTF_8);
-                    requestBodyRef.set(bodyStr);
                     logger.info(">>> 요청 본문: {}", bodyStr);
                 });
             }
         };
+    }
+    
+    /**
+     * 응답 본문을 로깅하는 응답 데코레이터 생성
+     */
+    @NonNull
+    private ServerHttpResponseDecorator createResponseDecorator(
+            @NonNull ServerHttpResponse originalResponse, 
+            @NonNull String requestMethod, 
+            @NonNull String requestPath, 
+            @NonNull String requestId) {
         
-        // 응답 로깅
-        ServerHttpResponseDecorator responseDecorator = new ServerHttpResponseDecorator(originalResponse) {
+        return new ServerHttpResponseDecorator(originalResponse) {
             @Override
-            public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+            @NonNull
+            public Mono<Void> writeWith(@NonNull Publisher<? extends DataBuffer> body) {
                 if (shouldLogBody(getHeaders().getContentType())) {
                     return super.writeWith(
                         Flux.from(body)
@@ -121,44 +153,39 @@ public class LoggingFilter implements GlobalFilter, Ordered {
                                 // 응답 내용을 문자열로 변환
                                 String bodyStr = new String(content, StandardCharsets.UTF_8);
                                 
-                                // 응답 로깅
-                                logger.info("<<< 응답 상태: {}", getStatusCode());
-                                logger.info("<<< 응답 헤더: {}", getHeaders());
-                                logger.info("<<< 응답 본문: {}", bodyStr);
-                                logger.info("<<< 요청 종료: {} {} (ID: {})", requestMethod, requestPath, requestId);
+                                // 응답 로깅 (통합)
+                                if (logger.isInfoEnabled()) {
+                                    logger.info("<<< 응답: {} {} (ID: {}), 상태: {}, 헤더: {}, 본문: {}",
+                                        requestMethod, requestPath, requestId, 
+                                        getStatusCode(), getHeaders(), bodyStr);
+                                }
                                 
                                 // 원본 데이터 반환
                                 return Mono.just(copiedBuffer);
                             })
                     );
                 } else {
-                    logger.info("<<< 응답 상태: {}", getStatusCode());
-                    logger.info("<<< 응답 헤더: {}", getHeaders());
-                    logger.info("<<< 응답 본문: [바이너리 데이터 - 로깅 생략]");
-                    logger.info("<<< 요청 종료: {} {} (ID: {})", requestMethod, requestPath, requestId);
+                    if (logger.isInfoEnabled()) {
+                        logger.info("<<< 응답: {} {} (ID: {}), 상태: {}, 헤더: {}, 본문: [바이너리 데이터]",
+                            requestMethod, requestPath, requestId, 
+                            getStatusCode(), getHeaders());
+                    }
                     return super.writeWith(body);
                 }
             }
             
             @Override
-            public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
+            @NonNull
+            public Mono<Void> writeAndFlushWith(@NonNull Publisher<? extends Publisher<? extends DataBuffer>> body) {
                 // 스트리밍 응답의 경우
-                logger.info("<<< 응답 상태: {}", getStatusCode());
-                logger.info("<<< 응답 헤더: {}", getHeaders());
-                logger.info("<<< 응답 본문: [스트리밍 데이터 - 로깅 생략]");
-                logger.info("<<< 요청 종료: {} {} (ID: {})", requestMethod, requestPath, requestId);
+                if (logger.isInfoEnabled()) {
+                    logger.info("<<< 응답: {} {} (ID: {}), 상태: {}, 헤더: {}, 본문: [스트리밍 데이터]",
+                        requestMethod, requestPath, requestId, 
+                        getStatusCode(), getHeaders());
+                }
                 return super.writeAndFlushWith(body);
             }
         };
-        
-        // 데코레이트된 요청과 응답으로 교체된 ServerWebExchange 생성
-        ServerWebExchange decoratedExchange = exchange.mutate()
-            .request(requestDecorator)
-            .response(responseDecorator)
-            .build();
-        
-        // 필터 체인 계속 진행
-        return chain.filter(decoratedExchange);
     }
     
     /**

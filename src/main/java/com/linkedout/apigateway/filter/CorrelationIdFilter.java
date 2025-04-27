@@ -14,10 +14,10 @@ import java.util.UUID;
 
 /**
  * 모든 요청에 대해 MDC(Mapped Diagnostic Context)에 correlationId를 추가하는 필터
- * 
+ * <p>
  * 이 필터는 각 요청에 고유한 correlationId를 생성하고 MDC에 저장합니다.
  * 이를 통해 로그에 요청별 식별자를 포함시켜 로그 추적 및 디버깅을 용이하게 합니다.
- * 
+ * <p>
  * {@code @Component}: 
  *    - Spring이 이 클래스를 컴포넌트로 인식하고 Bean으로 등록하도록 함
  */

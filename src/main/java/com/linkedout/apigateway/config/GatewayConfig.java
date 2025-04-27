@@ -22,16 +22,19 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class GatewayConfig {
-    
+		private final MessageQueueGatewayFilter messageQueueGatewayFilter;
+
     /**
      * RabbitMQ로 메시지를 전송하는 필터 주입
      * <p>
-     * {@code @Autowired}: 
+     * {@code @Autowired}:
      *    - Spring이 MessageQueueGatewayFilter 타입의 Bean을 찾아 자동으로 주입(의존성 주입)
      *    - 이 필터는 HTTP 요청을 RabbitMQ 메시지로 변환하는 역할을 함
      */
     @Autowired
-    private MessageQueueGatewayFilter messageQueueGatewayFilter;
+		public GatewayConfig(MessageQueueGatewayFilter messageQueueGatewayFilter) {
+			this.messageQueueGatewayFilter = messageQueueGatewayFilter;
+		}
     
     /**
      * API Gateway의 라우트를 정의하는 Bean

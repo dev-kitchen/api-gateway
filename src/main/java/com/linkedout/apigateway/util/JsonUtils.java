@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 
 /**
  * JSON 변환 유틸리티 클래스
- * 
+ * <p>
  * 이 클래스는 Jackson ObjectMapper를 사용하여 객체와 JSON 문자열 간의 
  * 변환을 쉽게 처리하는 유틸리티 메서드를 제공합니다.
- * 
+ * <p>
  * {@code @Component}: 
  *    - Spring이 이 클래스를 컴포넌트로 인식하고 Bean으로 등록하도록 함
  */

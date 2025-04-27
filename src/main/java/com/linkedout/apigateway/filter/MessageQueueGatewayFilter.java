@@ -26,11 +26,11 @@ import java.util.UUID;
 
 /**
  * API Gateway에서 HTTP 요청을 RabbitMQ 메시지로 변환하여 전송하는 필터
- * 
+ * <p>
  * 이 필터는 클라이언트로부터 받은 HTTP 요청을 RabbitMQ 메시지로 변환하고,
  * 해당 서비스의 응답을 다시 클라이언트에게 전달하는 역할을 합니다.
  * Spring Cloud Gateway의 필터 체인에서 동작하며, 리액티브 프로그래밍 방식으로 구현되었습니다.
- * 
+ * <p>
  * {@code @Component}: 
  *    - Spring이 이 클래스를 컴포넌트로 인식하고 자동으로 Bean으로 등록하도록 하는 애노테이션
  */
@@ -76,7 +76,7 @@ public class MessageQueueGatewayFilter extends AbstractGatewayFilterFactory<Mess
     
     /**
      * 필터 로직을 정의하는 메서드
-     * 
+     * <p>
      * 이 메서드에서는 HTTP 요청을 RabbitMQ 메시지로 변환하고,
      * 비동기적으로 응답을 기다린 후 클라이언트에게 전달하는 로직을 구현합니다.
      * 
@@ -140,7 +140,7 @@ public class MessageQueueGatewayFilter extends AbstractGatewayFilterFactory<Mess
     
     /**
      * 비동기 응답을 처리하는 메서드
-     * 
+     * <p>
      * 이 메서드는 마이크로서비스로부터의 응답을 기다리고,
      * 응답이 도착하면 HTTP 응답으로 변환하여 클라이언트에게 전송합니다.
      * 응답은 표준화된 ApiResponse 형식으로 변환됩니다.
@@ -176,29 +176,29 @@ public class MessageQueueGatewayFilter extends AbstractGatewayFilterFactory<Mess
                 
                 try {
                     // 성공적인 응답인 경우
-                    if (httpStatus.is2xxSuccessful()) {
+									ApiResponse<?> apiResponse;
+									if (httpStatus.is2xxSuccessful()) {
                         // 표준 응답 형식으로 래핑 (마이크로서비스가 반환한 정확한 상태 코드 사용)
-                        ApiResponse<?> apiResponse = ApiResponse.success(
-                                httpStatus.value(),
-                                responseBody,  // 원본 응답 본문을 data 필드에 할당
-                                httpStatus.getReasonPhrase());
+										apiResponse = ApiResponse.success(
+											httpStatus.value(),
+											responseBody,  // 원본 응답 본문을 data 필드에 할당
+											httpStatus.getReasonPhrase());
                         
                         // ObjectMapper를 사용하여 JSON 직렬화
-                        responseBodyBytes = jsonUtils.toJson(apiResponse).getBytes(StandardCharsets.UTF_8);
-                    } else {
+									} else {
                         // 오류 응답인 경우
-                        ApiResponse<?> apiResponse = ApiResponse.builder()
-                                .status(httpStatus.value())
-                                .message(httpStatus.getReasonPhrase())
-                                .error(new ApiResponse.ErrorInfo(
-                                        "ERR_" + httpStatus.value(), 
-                                        responseBody))
-                                .build();
+										apiResponse = ApiResponse.builder()
+											.status(httpStatus.value())
+											.message(httpStatus.getReasonPhrase())
+											.error(new ApiResponse.ErrorInfo(
+												"ERR_" + httpStatus.value(),
+												responseBody))
+											.build();
                         
                         // ObjectMapper를 사용하여 JSON 직렬화
-                        responseBodyBytes = jsonUtils.toJson(apiResponse).getBytes(StandardCharsets.UTF_8);
-                    }
-                } catch (Exception e) {
+									}
+									responseBodyBytes = jsonUtils.toJson(apiResponse).getBytes(StandardCharsets.UTF_8);
+								} catch (Exception e) {
                     // JSON 변환 실패 시 원본 응답 사용
                     responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
                 }
@@ -229,10 +229,10 @@ public class MessageQueueGatewayFilter extends AbstractGatewayFilterFactory<Mess
     
     /**
      * 필터 설정을 위한 내부 클래스
-     * 
+     * <p>
      * 이 클래스는 필터가 사용할 설정 정보를 담고 있습니다.
      * 주로 메시지를 전송할 큐 이름을 지정하는 데 사용됩니다.
-     * 
+     * <p>
      * Lombok의 @Getter, @Setter 애노테이션을 사용하여 게터/세터 메서드를 자동 생성합니다.
      */
     @Setter
