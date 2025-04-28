@@ -57,6 +57,10 @@ public class GatewayConfig {
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
+            // 헬스체크 경로 설정 - 컨트롤러에서 직접 처리
+            .route("health-check", r -> r.path("/health")
+                .uri("forward:/health"))  // 내부 컨트롤러로 요청 전달
+                
             // 사용자 서비스 라우팅 설정
             .route("user-service", r -> r.path("/api/users/**")  // /api/users/로 시작하는 모든 요청을 매칭
                 .filters(f -> f.filter(messageQueueGatewayFilter.apply(

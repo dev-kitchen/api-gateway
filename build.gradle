@@ -88,6 +88,8 @@ dependencies {
     
     // JUnit 플랫폼 런처 - JUnit 테스트 실행을 위한 라이브러리
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+		implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 // 테스트 태스크 설정
