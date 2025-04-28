@@ -32,7 +32,7 @@ spring:
 # 서버 설정
 server:
   # API Gateway가 실행될 포트 설정
-  port: 8080
+  port: 9090
 
 # 로깅 설정
 logging:
