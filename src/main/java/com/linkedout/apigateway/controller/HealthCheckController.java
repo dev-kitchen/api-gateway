@@ -1,4 +1,4 @@
-package com.linkedout.apigateway.api;
+package com.linkedout.apigateway.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
