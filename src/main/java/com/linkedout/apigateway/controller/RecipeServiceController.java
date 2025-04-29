@@ -19,7 +19,8 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/recipes")
 public class RecipeServiceController extends BaseServiceController {
 
-	private static final String RECIPE_SERVICE_QUEUE = "recipe-service-queue";
+	// todo delete
+	private static final String RECIPE_SERVICE_QUEUE = "recipe-queue";
 
 	public RecipeServiceController(
 		RabbitTemplate rabbitTemplate,

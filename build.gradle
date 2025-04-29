@@ -5,9 +5,11 @@ plugins {
 	// 자바 컴파일 플러그인
 	id 'java'
 	// Spring Boot 프로젝트를 빌드하기 위한 플러그인 (버전 3.4.5)
-	id 'org.springframework.boot' version '3.4.5'
+	id 'org.springframework.boot' version '3.2.5'
 	// 스프링의 의존성 관리 기능을 활용하기 위한 플러그인
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.hibernate.orm' version '6.6.8.Final'
+	id 'org.graalvm.buildtools.native' version '0.10.5'
 }
 
 // 프로젝트 그룹 ID (Maven 좌표 시스템의 일부)
@@ -94,6 +96,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 	implementation 'com.linkedout:common:0.0.1'
+
+	implementation 'io.swagger.core.v3:swagger-models:2.2.18'
+
+	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
+
 }
 
 // 테스트 태스크 설정

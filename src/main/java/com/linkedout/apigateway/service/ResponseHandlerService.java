@@ -1,5 +1,6 @@
 package com.linkedout.apigateway.service;
 
+import com.linkedout.common.constant.RabbitMQConstants;
 import com.linkedout.common.dto.ResponseData;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -24,8 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 public class ResponseHandlerService {
-	public static final String GATEWAY_QUEUE = "api-gateway-queue";
-
 	/**
 	 * 응답 핸들러 맵
 	 * <p>
@@ -82,7 +81,7 @@ public class ResponseHandlerService {
 	 *
 	 * @param responseData 마이크로서비스로부터 받은 응답 데이터
 	 */
-	@RabbitListener(queues = GATEWAY_QUEUE)
+	@RabbitListener(queues = RabbitMQConstants.GATEWAY_QUEUE)
 	@ConditionalOnProperty(name = "spring.rabbitmq.enabled", havingValue = "true", matchIfMissing = true)
 	public void handleResponse(ResponseData responseData) {
 		// 응답 데이터에서 correlationId 추출

@@ -8,6 +8,7 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import com.linkedout.common.constant.RabbitMQConstants;
 
 /**
  * RabbitMQ 설정을 담당하는 클래스
@@ -29,8 +30,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConditionalOnProperty(name = "spring.rabbitmq.enabled", havingValue = "true", matchIfMissing = true)
 public class RabbitMQConfig {
-	public static final String GATEWAY_QUEUE = "api-gateway-queue";
-	public static final String AUTH_QUEUE = "auth-queue";
 
 	/**
 	 * 사용자 서비스에 요청을 전송하기 위한 큐를 정의하는 Bean
@@ -48,7 +47,7 @@ public class RabbitMQConfig {
 	public Queue authServiceQueue() {
 		// 첫 번째 매개변수: 큐 이름
 		// 두 번째 매개변수: durable (true로 설정하면 RabbitMQ 서버가 재시작되어도 큐가 유지됨)
-		return new Queue(AUTH_QUEUE, false);
+		return new Queue(RabbitMQConstants.AUTH_QUEUE, false);
 	}
 
 	/**
@@ -75,9 +74,9 @@ public class RabbitMQConfig {
 	 */
 	@Bean
 	public Queue responseQueue() {
-		return new Queue(GATEWAY_QUEUE, false);
+		return new Queue(RabbitMQConstants.GATEWAY_QUEUE, false);
 	}
-	
+
 	/**
 	 * JSON 형식의 메시지 변환기를 정의하는 Bean
 	 * <p>
