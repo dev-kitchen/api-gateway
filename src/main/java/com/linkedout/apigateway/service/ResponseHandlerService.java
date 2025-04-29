@@ -1,6 +1,6 @@
 package com.linkedout.apigateway.service;
 
-import com.linkedout.apigateway.model.ResponseData;
+import com.linkedout.common.dto.ResponseData;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;

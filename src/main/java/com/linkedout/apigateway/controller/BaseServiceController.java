@@ -1,8 +1,5 @@
 package com.linkedout.apigateway.controller;
 
-import com.linkedout.apigateway.model.ApiResponse;
-import com.linkedout.apigateway.model.RequestData;
-import com.linkedout.apigateway.model.ResponseData;
 import com.linkedout.apigateway.service.ResponseHandlerService;
 import com.linkedout.apigateway.util.JsonUtils;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +12,9 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
-
+import com.linkedout.common.dto.ApiResponse;
+import com.linkedout.common.dto.RequestData;
+import com.linkedout.common.dto.ResponseData;
 
 import java.util.HashMap;
 import java.util.Map;

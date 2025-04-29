@@ -1,6 +1,6 @@
 package com.linkedout.apigateway.controller;
 
-import com.linkedout.apigateway.model.ApiResponse;
+import com.linkedout.common.dto.ApiResponse;
 import com.linkedout.apigateway.service.ResponseHandlerService;
 import com.linkedout.apigateway.util.JsonUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -19,18 +19,18 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/recipes")
 public class RecipeServiceController extends BaseServiceController {
 
-    private static final String RECIPE_SERVICE_QUEUE = "recipe-service-queue";
-    
-    public RecipeServiceController(
-            RabbitTemplate rabbitTemplate,
-            ResponseHandlerService responseHandlerService, 
-            JsonUtils jsonUtils) {
-        super(rabbitTemplate, responseHandlerService, jsonUtils);
-    }
+	private static final String RECIPE_SERVICE_QUEUE = "recipe-service-queue";
+
+	public RecipeServiceController(
+		RabbitTemplate rabbitTemplate,
+		ResponseHandlerService responseHandlerService,
+		JsonUtils jsonUtils) {
+		super(rabbitTemplate, responseHandlerService, jsonUtils);
+	}
 
 
-    @RequestMapping("/**")
-    public Mono<ApiResponse<?>> handleRecipeServiceRequest(ServerWebExchange exchange) {
-        return processRequest(exchange, RECIPE_SERVICE_QUEUE);
-    }
+	@RequestMapping("/**")
+	public Mono<ApiResponse<?>> handleRecipeServiceRequest(ServerWebExchange exchange) {
+		return processRequest(exchange, RECIPE_SERVICE_QUEUE);
+	}
 }
