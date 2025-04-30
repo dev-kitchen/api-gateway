@@ -103,6 +103,14 @@ dependencies {
 
 }
 
+def getVersionName = { ->
+	// 환경 변수에서 버전 가져오기 (semantic-release가 설정)
+	def version = System.getenv('NEXT_VERSION')
+	return version ?: '0.0.1-SNAPSHOT' // 기본값
+}
+
+version = getVersionName()
+
 // 테스트 태스크 설정
 tasks.named('test') {
 	// JUnit 5(Jupiter)를 사용하여 테스트 실행
