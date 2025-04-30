@@ -4,6 +4,7 @@ import com.linkedout.common.dto.ApiResponse;
 import com.linkedout.apigateway.service.ResponseHandlerService;
 import com.linkedout.apigateway.util.JsonUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
@@ -31,7 +32,7 @@ public class RecipeServiceController extends BaseServiceController {
 
 
 	@RequestMapping("/**")
-	public Mono<ApiResponse<?>> handleRecipeServiceRequest(ServerWebExchange exchange) {
+	public Mono<ResponseEntity<ApiResponse<?>>> handleRecipeServiceRequest(ServerWebExchange exchange) {
 		return processRequest(exchange, RECIPE_SERVICE_QUEUE);
 	}
 }

@@ -50,19 +50,6 @@ public class RabbitMQConfig {
 		return new Queue(RabbitMQConstants.AUTH_QUEUE, false);
 	}
 
-	/**
-	 * 레시피 서비스에 요청을 전송하기 위한 큐를 정의하는 Bean
-	 * <p>
-	 * 이 큐는 API Gateway가 레시피 서비스로 요청을 전송할 때 사용됩니다.
-	 * GatewayConfig에서 /api/recipes/** 경로의 요청을 이 큐로 전송하도록 설정되어 있습니다.
-	 *
-	 * @return 레시피 서비스 요청 큐
-	 */
-//    @Bean
-//    public Queue recipeServiceQueue() {
-////			todo
-//        return new Queue("", false);
-//    }
 
 	/**
 	 * 마이크로서비스로부터 응답을 받기 위한 큐를 정의하는 Bean

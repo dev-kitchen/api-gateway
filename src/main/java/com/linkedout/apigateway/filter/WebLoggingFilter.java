@@ -1,11 +1,9 @@
 package com.linkedout.apigateway.filter;
 
 import io.micrometer.common.lang.NonNull;
-import io.micrometer.common.lang.NonNullApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -90,7 +88,7 @@ public class WebLoggingFilter implements WebFilter, Ordered {
 	private Mono<Void> logResponse(ServerWebExchange exchange, WebFilterChain chain,
 																 String method, String path, String requestId) {
 		long startTime = System.currentTimeMillis();
-
+		logger.info(String.valueOf(exchange));
 		return chain.filter(exchange)
 			.doFinally(signalType -> {
 				long endTime = System.currentTimeMillis();

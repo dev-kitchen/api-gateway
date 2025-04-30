@@ -5,6 +5,7 @@ import com.linkedout.common.dto.ApiResponse;
 import com.linkedout.apigateway.service.ResponseHandlerService;
 import com.linkedout.apigateway.util.JsonUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,12 +34,12 @@ public class AuthServiceController extends BaseServiceController {
 	 * @return 인증 서비스의 상태 정보를 포함한 {@link Mono} API 응답
 	 */
 	@GetMapping("/health")
-	public Mono<ApiResponse<?>> health(ServerWebExchange exchange) {
+	public Mono<ResponseEntity<ApiResponse<?>>> health(ServerWebExchange exchange) {
 		return processRequest(exchange, RabbitMQConstants.AUTH_QUEUE);
 	}
 
 	@RequestMapping("/**")
-	public Mono<ApiResponse<?>> handleAuthServiceRequest(ServerWebExchange exchange) {
+	public Mono<ResponseEntity<ApiResponse<?>>> handleAuthServiceRequest(ServerWebExchange exchange) {
 		return processRequest(exchange, RabbitMQConstants.AUTH_QUEUE);
 	}
 }

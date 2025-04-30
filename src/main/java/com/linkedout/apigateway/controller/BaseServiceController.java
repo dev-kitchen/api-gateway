@@ -8,6 +8,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -42,7 +43,7 @@ public abstract class BaseServiceController {
 	 * @param queueName 메시지를 전송할 큐 이름
 	 * @return 마이크로서비스의 응답을 포함한 API 응답
 	 */
-	protected Mono<ApiResponse<?>> processRequest(ServerWebExchange exchange, String queueName) {
+	protected Mono<ResponseEntity<ApiResponse<?>>> processRequest(ServerWebExchange exchange, String queueName) {
 		ServerHttpRequest request = exchange.getRequest();
 
 		// 요청 본문 읽기
@@ -79,8 +80,24 @@ public abstract class BaseServiceController {
 				});
 				// 비동기 응답 처리
 				return responseHandlerService.awaitResponse(correlationId)
-					.map(this::createApiResponse);
+					.map(this::createApiResponseEntity);
 			});
+	}
+
+	/**
+	 * ResponseData를 ResponseEntity<ApiResponse<?>> 응답 형식으로 변환
+	 */
+	protected ResponseEntity<ApiResponse<?>> createApiResponseEntity(ResponseData responseData) {
+		HttpStatus httpStatus = HttpStatus.valueOf(responseData.getStatusCode());
+
+		log.info(responseData.toString());
+//		ResponseData(correlationId=3314724d-148a-473c-b91d-392105a1ebb6, statusCode=401, headers={Content-Type=application/json}, body={"success":false,"message":"에러테스트","status":401})
+
+		// ApiResponse 객체 생성
+		ApiResponse<?> apiResponse = createApiResponse(responseData);
+
+		// ResponseEntity에 상태 코드와 함께 ApiResponse 객체를 담아 반환
+		return ResponseEntity.status(httpStatus).body(apiResponse);
 	}
 
 	/**
@@ -88,6 +105,9 @@ public abstract class BaseServiceController {
 	 */
 	protected ApiResponse<?> createApiResponse(ResponseData responseData) {
 		HttpStatus httpStatus = HttpStatus.valueOf(responseData.getStatusCode());
+
+		log.info(responseData.toString());
+//		ResponseData(correlationId=3314724d-148a-473c-b91d-392105a1ebb6, statusCode=401, headers={Content-Type=application/json}, body={"success":false,"message":"에러테스트","status":401})
 
 		// Content-Type 확인
 		String contentType = responseData.getHeaders().get("Content-Type");
@@ -106,13 +126,11 @@ public abstract class BaseServiceController {
 						httpStatus.getReasonPhrase()
 					);
 				} else {
-					return ApiResponse.builder()
-						.status(httpStatus.value())
-						.message(httpStatus.getReasonPhrase())
-						.error(new ApiResponse.ErrorInfo(
-							"ERR_" + httpStatus.value(),
-							(String) parsedBody))  // 파싱된 객체 사용
-						.build();
+					return ApiResponse.error(
+						httpStatus.value(),
+						parsedBody,
+						httpStatus.getReasonPhrase()
+					);
 				}
 			} catch (JsonProcessingException e) {
 				// JSON 파싱 실패 시 원본 문자열 사용
@@ -136,13 +154,10 @@ public abstract class BaseServiceController {
 				httpStatus.getReasonPhrase()
 			);
 		} else {
-			return ApiResponse.builder()
-				.status(httpStatus.value())
-				.message(httpStatus.getReasonPhrase())
-				.error(new ApiResponse.ErrorInfo(
-					"ERR_" + httpStatus.value(),
-					responseData.getBody()))
-				.build();
+			return ApiResponse.error(
+				httpStatus.value(),
+				responseData.getBody(),
+				httpStatus.getReasonPhrase());
 		}
 	}
 
