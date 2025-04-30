@@ -71,18 +71,12 @@ public abstract class BaseServiceController {
 
 				// 메시지 상관관계 ID 생성
 				String correlationId = UUID.randomUUID().toString();
-				//todo delete
-				log.info("생성된 아이디: {}", correlationId);
-
 				// RabbitMQ로 메시지 전송
 				rabbitTemplate.convertAndSend(queueName, requestData, message -> {
 					message.getMessageProperties().setCorrelationId(correlationId);
 					message.getMessageProperties().getHeaders().put(AmqpHeaders.CORRELATION_ID, correlationId);
 					return message;
 				});
-
-				log.info("Sent message to queue: {}, correlationId: {}", queueName, correlationId);
-
 				// 비동기 응답 처리
 				return responseHandlerService.awaitResponse(correlationId)
 					.map(this::createApiResponse);
