@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AppConfig {
-	@Bean
-	public ErrorResponseBuilder errorResponseBuilder(ObjectMapper objectMapper) {
-		return new ErrorResponseBuilder(objectMapper);
-	}
+  @Bean
+  public ErrorResponseBuilder errorResponseBuilder(ObjectMapper objectMapper) {
+    return new ErrorResponseBuilder(objectMapper);
+  }
 }
