@@ -1,14 +1,10 @@
 package com.linkedout.apigateway.controller;
 
-import com.linkedout.common.dto.ApiResponse;
-import com.linkedout.apigateway.service.ResponseHandlerService;
+import com.linkedout.apigateway.service.MessageResponseHandlerService;
 import com.linkedout.apigateway.util.JsonUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
 /**
  * 레시피 서비스 관련 요청을 처리하는 컨트롤러
@@ -25,14 +21,14 @@ public class RecipeServiceController extends BaseServiceController {
 
 	public RecipeServiceController(
 		RabbitTemplate rabbitTemplate,
-		ResponseHandlerService responseHandlerService,
+		MessageResponseHandlerService messageResponseHandlerService,
 		JsonUtils jsonUtils) {
-		super(rabbitTemplate, responseHandlerService, jsonUtils);
+		super(rabbitTemplate, messageResponseHandlerService, jsonUtils);
 	}
 
 
-	@RequestMapping("/**")
-	public Mono<ResponseEntity<ApiResponse<?>>> handleRecipeServiceRequest(ServerWebExchange exchange) {
-		return processRequest(exchange, RECIPE_SERVICE_QUEUE);
-	}
+//	@RequestMapping("/**")
+//	public Mono<ResponseEntity<ApiResponse<?>>> handleRecipeServiceRequest(ServerWebExchange exchange) {
+//		return processRequest(exchange, RECIPE_SERVICE_QUEUE);
+//	}
 }

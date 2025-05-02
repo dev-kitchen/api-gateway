@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * - 비즈니스 로직을 처리하는 컴포넌트임을 나타냄
  */
 @Service
-public class ResponseHandlerService {
+public class MessageResponseHandlerService {
 	/**
 	 * 응답 핸들러 맵
 	 * <p>

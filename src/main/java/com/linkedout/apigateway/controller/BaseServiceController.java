@@ -1,6 +1,6 @@
 package com.linkedout.apigateway.controller;
 
-import com.linkedout.apigateway.service.ResponseHandlerService;
+import com.linkedout.apigateway.service.MessageResponseHandlerService;
 import com.linkedout.apigateway.util.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.linkedout.common.dto.ApiResponse;
+import com.linkedout.common.dto.BaseApiResponse;
 import com.linkedout.common.dto.RequestData;
 import com.linkedout.common.dto.ResponseData;
 
@@ -33,7 +33,7 @@ import java.util.UUID;
 public abstract class BaseServiceController {
 
 	protected final RabbitTemplate rabbitTemplate;
-	protected final ResponseHandlerService responseHandlerService;
+	protected final MessageResponseHandlerService messageResponseHandlerService;
 	protected final JsonUtils jsonUtils;
 
 	/**
@@ -43,8 +43,11 @@ public abstract class BaseServiceController {
 	 * @param queueName 메시지를 전송할 큐 이름
 	 * @return 마이크로서비스의 응답을 포함한 API 응답
 	 */
-	protected Mono<ResponseEntity<ApiResponse<?>>> processRequest(ServerWebExchange exchange, String queueName) {
+	protected <T> Mono<ResponseEntity<BaseApiResponse<T>>> processRequest(ServerWebExchange exchange, String queueName) {
 		ServerHttpRequest request = exchange.getRequest();
+
+		log.info("================================================");
+		log.info(String.valueOf(request.getBody()));
 
 		// 요청 본문 읽기
 		return request.getBody()
@@ -79,7 +82,7 @@ public abstract class BaseServiceController {
 					return message;
 				});
 				// 비동기 응답 처리
-				return responseHandlerService.awaitResponse(correlationId)
+				return messageResponseHandlerService.awaitResponse(correlationId)
 					.map(this::createApiResponseEntity);
 			});
 	}
@@ -87,14 +90,14 @@ public abstract class BaseServiceController {
 	/**
 	 * ResponseData를 ResponseEntity<ApiResponse<?>> 응답 형식으로 변환
 	 */
-	protected ResponseEntity<ApiResponse<?>> createApiResponseEntity(ResponseData responseData) {
+	protected <T> ResponseEntity<BaseApiResponse<T>> createApiResponseEntity(ResponseData responseData) {
 		HttpStatus httpStatus = HttpStatus.valueOf(responseData.getStatusCode());
 
 		log.info(responseData.toString());
-//		ResponseData(correlationId=3314724d-148a-473c-b91d-392105a1ebb6, statusCode=401, headers={Content-Type=application/json}, body={"success":false,"message":"에러테스트","status":401})
+//		ResponseData(correlationId=3fb7d3a1-2051-467d-b546-3831c39a2655, statusCode=401, headers={Content-Type=application/json}, body={"success":false,"message":"에러테스트","status":401})
 
 		// ApiResponse 객체 생성
-		ApiResponse<?> apiResponse = createApiResponse(responseData);
+		BaseApiResponse<T> apiResponse = createApiResponse(responseData);
 
 		// ResponseEntity에 상태 코드와 함께 ApiResponse 객체를 담아 반환
 		return ResponseEntity.status(httpStatus).body(apiResponse);
@@ -103,11 +106,9 @@ public abstract class BaseServiceController {
 	/**
 	 * ResponseData를 API 응답 형식으로 변환
 	 */
-	protected ApiResponse<?> createApiResponse(ResponseData responseData) {
+	protected <T> BaseApiResponse<T> createApiResponse(ResponseData responseData) {
 		HttpStatus httpStatus = HttpStatus.valueOf(responseData.getStatusCode());
 
-		log.info(responseData.toString());
-//		ResponseData(correlationId=3314724d-148a-473c-b91d-392105a1ebb6, statusCode=401, headers={Content-Type=application/json}, body={"success":false,"message":"에러테스트","status":401})
 
 		// Content-Type 확인
 		String contentType = responseData.getHeaders().get("Content-Type");
@@ -119,16 +120,20 @@ public abstract class BaseServiceController {
 				ObjectMapper objectMapper = new ObjectMapper();
 				Object parsedBody = objectMapper.readValue(responseData.getBody(), Object.class);
 
+				// 타입 캐스팅 추가
+				@SuppressWarnings("unchecked")
+				T typedBody = (T) parsedBody;
+
 				if (httpStatus.is2xxSuccessful()) {
-					return ApiResponse.success(
+					return BaseApiResponse.success(
 						httpStatus.value(),
-						parsedBody,  // 파싱된 객체 사용
+						typedBody,  // 파싱된 객체 사용
 						httpStatus.getReasonPhrase()
 					);
 				} else {
-					return ApiResponse.error(
+					return BaseApiResponse.error(
 						httpStatus.value(),
-						parsedBody,
+						typedBody,
 						httpStatus.getReasonPhrase()
 					);
 				}
@@ -146,17 +151,21 @@ public abstract class BaseServiceController {
 	/**
 	 * JSON 파싱 실패 시 또는 JSON이 아닌 경우 사용할 응답 생성 메서드
 	 */
-	private ApiResponse<?> fallbackResponse(ResponseData responseData, HttpStatus httpStatus) {
+	private <T> BaseApiResponse<T> fallbackResponse(ResponseData responseData, HttpStatus httpStatus) {
+		// 타입 캐스팅 추가
+		@SuppressWarnings("unchecked")
+		T body = (T) responseData.getBody();
+
 		if (httpStatus.is2xxSuccessful()) {
-			return ApiResponse.success(
+			return BaseApiResponse.success(
 				httpStatus.value(),
-				responseData.getBody(),
+				body,
 				httpStatus.getReasonPhrase()
 			);
 		} else {
-			return ApiResponse.error(
+			return BaseApiResponse.error(
 				httpStatus.value(),
-				responseData.getBody(),
+				body,
 				httpStatus.getReasonPhrase());
 		}
 	}
