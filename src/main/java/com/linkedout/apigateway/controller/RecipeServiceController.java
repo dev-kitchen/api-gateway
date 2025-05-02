@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RecipeServiceController extends BaseServiceController {
 
   // todo delete
-  private static final String RECIPE_SERVICE_QUEUE = "recipe-queue";
+  private static final String RECIPE_QUEUE = "recipe-queue";
 
   public RecipeServiceController(
       RabbitTemplate rabbitTemplate,
@@ -28,6 +28,6 @@ public class RecipeServiceController extends BaseServiceController {
   //	@RequestMapping("/**")
   //	public Mono<ResponseEntity<ApiResponse<?>>> handleRecipeServiceRequest(ServerWebExchange
   // exchange) {
-  //		return processRequest(exchange, RECIPE_SERVICE_QUEUE);
+  //		return processRequest(exchange, RECIPE_QUEUE);
   //	}
 }
