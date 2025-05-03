@@ -7,6 +7,7 @@ import com.linkedout.apigateway.util.JsonUtils;
 import com.linkedout.common.dto.HealthResponse;
 import com.linkedout.common.dto.auth.oauth.google.GoogleOAuthRequest;
 import com.linkedout.common.dto.auth.oauth.google.GoogleOAuthResponse;
+import com.linkedout.common.schema.GoogleOAuthResponseSchema;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,7 +21,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/auth")
-public class AuthServiceController extends BaseServiceController {
+public class AuthServiceController extends MessageClient {
 
   public AuthServiceController(
       RabbitTemplate rabbitTemplate,
@@ -54,29 +55,30 @@ public class AuthServiceController extends BaseServiceController {
     return processRequest(exchange, RabbitMQConstants.AUTH_QUEUE);
   }
 
-  @GetMapping("/error")
-  public Mono<ResponseEntity<BaseApiResponse<Object>>> healthCheck2(ServerWebExchange exchange) {
-    return processRequest(exchange, RabbitMQConstants.AUTH_QUEUE);
-  }
+  //  @GetMapping("/error")
+  //  public Mono<ResponseEntity<BaseApiResponse<Object>>> healthCheck2(ServerWebExchange exchange)
+  // {
+  //    return processRequest(exchange, RabbitMQConstants.AUTH_QUEUE);
+  //  }
 
   @Operation(
       summary = "구글 OAuth 안드로이드 로그인",
       description = "안드로이드 앱에서 전달받은 구글 OAuth 토큰을 검증하고 회원가입/로그인을 처리합니다.",
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description = "구글 OAuth 인증 요청",
+              content =
+                  @Content(
+                      mediaType = "application/json",
+                      schema = @Schema(implementation = GoogleOAuthRequest.class))),
       responses = {
         @ApiResponse(
             responseCode = "201",
-            description = "로그인 성공",
+            description = "로그인/회원가입 성공",
             content =
                 @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = BaseApiResponse.class))),
-        @ApiResponse(
-            responseCode = "400",
-            description = "잘못된 요청 (유효하지 않은 인증코드)",
-            content =
-                @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = BaseApiResponse.class))),
+                    schema = @Schema(implementation = GoogleOAuthResponseSchema.class))),
       })
   @PostMapping("/google/android")
   public Mono<ResponseEntity<BaseApiResponse<GoogleOAuthResponse>>> handleGoogleAndroidLogin(

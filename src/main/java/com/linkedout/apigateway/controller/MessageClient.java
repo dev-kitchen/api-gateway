@@ -29,7 +29,7 @@ import java.util.UUID;
  */
 @Slf4j
 @RequiredArgsConstructor
-public abstract class BaseServiceController {
+public abstract class MessageClient {
 
   protected final RabbitTemplate rabbitTemplate;
   protected final MessageResponseHandlerService messageResponseHandlerService;

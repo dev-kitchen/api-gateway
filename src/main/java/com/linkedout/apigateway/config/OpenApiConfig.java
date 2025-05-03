@@ -15,13 +15,13 @@ public class OpenApiConfig {
     return new OpenAPI()
         .info(
             new Info()
-                .title("WebFlux API 문서")
-                .description("Spring WebFlux로 만든 API 문서입니다")
+                .title("우당턍탕 API 문서")
+                .description("일을합시다 일일일")
                 .version("v1.0.0")
                 .contact(
                     new Contact()
-                        .name("개발자 이름")
-                        .email("email@example.com")
+                        .name("조씨")
+                        .email("daechan476@gmail.com")
                         .url("https://github.com/yourusername"))
                 .license(new License().name("Apache 2.0").url("http://springdoc.org")));
   }
