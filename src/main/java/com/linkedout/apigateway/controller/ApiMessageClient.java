@@ -23,13 +23,13 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * 마이크로서비스로 메시지를 전송하는 기본 컨트롤러
+ * API-Gateway 에서 마이크로서비스로 메시지를 전송하는 기본 컨트롤러
  *
  * <p>이 추상 클래스는 HTTP 요청을 받아 RabbitMQ 메시지로 변환하고 전송하는 공통 로직을 제공합니다. 각 서비스별 컨트롤러는 이 클래스를 상속받아 구현합니다.
  */
 @Slf4j
 @RequiredArgsConstructor
-public abstract class MessageClient {
+public abstract class ApiMessageClient {
 
   protected final RabbitTemplate rabbitTemplate;
   protected final MessageResponseHandlerService messageResponseHandlerService;

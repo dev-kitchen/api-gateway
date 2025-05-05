@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/recipes")
-public class RecipeServiceController extends MessageClient {
+public class RecipeServiceController extends ApiMessageClient {
 
   // todo delete
   private static final String RECIPE_QUEUE = "recipe-queue";

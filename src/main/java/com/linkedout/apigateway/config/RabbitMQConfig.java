@@ -43,7 +43,7 @@ public class RabbitMQConfig {
   public Queue authServiceQueue() {
     // 첫 번째 매개변수: 큐 이름
     // 두 번째 매개변수: durable (true로 설정하면 RabbitMQ 서버가 재시작되어도 큐가 유지됨)
-    return new Queue(RabbitMQConstants.AUTH_QUEUE, false);
+    return new Queue(RabbitMQConstants.AUTH_API_QUEUE, false);
   }
 
   /**

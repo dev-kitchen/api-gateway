@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/auth")
-public class AuthServiceController extends MessageClient {
+public class AuthServiceController extends ApiMessageClient {
 
   public AuthServiceController(
       RabbitTemplate rabbitTemplate,
@@ -52,14 +52,8 @@ public class AuthServiceController extends MessageClient {
   @GetMapping("/health")
   public Mono<ResponseEntity<BaseApiResponse<HealthResponse>>> healthCheck(
       ServerWebExchange exchange) {
-    return processRequest(exchange, RabbitMQConstants.AUTH_QUEUE);
+    return processRequest(exchange, RabbitMQConstants.AUTH_API_QUEUE);
   }
-
-  //  @GetMapping("/error")
-  //  public Mono<ResponseEntity<BaseApiResponse<Object>>> healthCheck2(ServerWebExchange exchange)
-  // {
-  //    return processRequest(exchange, RabbitMQConstants.AUTH_QUEUE);
-  //  }
 
   @Operation(
       summary = "구글 OAuth 안드로이드 로그인",
@@ -83,7 +77,7 @@ public class AuthServiceController extends MessageClient {
   @PostMapping("/google/android")
   public Mono<ResponseEntity<BaseApiResponse<GoogleOAuthResponse>>> handleGoogleAndroidLogin(
       @RequestBody @Validated GoogleOAuthRequest request, ServerWebExchange exchange) {
-    return processRequest(exchange, RabbitMQConstants.AUTH_QUEUE);
+    return processRequest(exchange, RabbitMQConstants.AUTH_API_QUEUE);
   }
 
   //	@RequestMapping("/**")
