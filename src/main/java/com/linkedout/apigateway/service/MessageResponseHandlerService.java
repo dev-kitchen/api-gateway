@@ -1,7 +1,7 @@
 package com.linkedout.apigateway.service;
 
 import com.linkedout.common.constant.RabbitMQConstants;
-import com.linkedout.common.dto.ResponseData;
+import com.linkedout.common.dto.ApiResponseData;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,8 @@ public class MessageResponseHandlerService {
    * <p>Sink란? - 리액터 프로젝트의 개념으로, 데이터를 수동으로 발행(emit)할 수 있는 객체입니다. - 여기서는 Sinks.One을 사용하여 정확히 하나의 값만
    * 발행할 수 있는 Sink를 생성합니다.
    */
-  private final Map<String, Sinks.One<ResponseData>> responseHandlers = new ConcurrentHashMap<>();
+  private final Map<String, Sinks.One<ApiResponseData>> responseHandlers =
+      new ConcurrentHashMap<>();
 
   /**
    * 특정 correlationId에 대한 응답을 기다리는 Mono를 반환하는 메서드
@@ -46,9 +47,9 @@ public class MessageResponseHandlerService {
    * @param correlationId 요청과 응답을 연결하는 상관관계 ID
    * @return 응답 데이터를 포함하는 Mono
    */
-  public Mono<ResponseData> awaitResponse(String correlationId) {
+  public Mono<ApiResponseData> awaitResponse(String correlationId) {
     // Sinks.one()을 사용하여 단일 값 발행이 가능한 Sink 생성
-    Sinks.One<ResponseData> sink = Sinks.one();
+    Sinks.One<ApiResponseData> sink = Sinks.one();
     // 맵에 correlationId와 Sink를 저장
     responseHandlers.put(correlationId, sink);
 
@@ -78,11 +79,11 @@ public class MessageResponseHandlerService {
       name = "spring.rabbitmq.enabled",
       havingValue = "true",
       matchIfMissing = true)
-  public void handleResponse(ResponseData responseData) {
+  public void handleResponse(ApiResponseData responseData) {
     // 응답 데이터에서 correlationId 추출
     String correlationId = responseData.getCorrelationId();
     // correlationId를 사용하여 맵에서 해당 Sink 찾기
-    Sinks.One<ResponseData> sink = responseHandlers.get(correlationId);
+    Sinks.One<ApiResponseData> sink = responseHandlers.get(correlationId);
 
     // Sink가 존재하면 응답 데이터 발행
     if (sink != null) {

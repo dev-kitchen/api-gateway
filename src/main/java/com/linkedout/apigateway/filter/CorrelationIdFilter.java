@@ -23,6 +23,7 @@ import java.util.UUID;
 public class CorrelationIdFilter implements GlobalFilter, Ordered {
 
   private static final Logger logger = LoggerFactory.getLogger(CorrelationIdFilter.class);
+  // todo
   private static final String CORRELATION_ID_KEY = "correlationId";
 
   @Override

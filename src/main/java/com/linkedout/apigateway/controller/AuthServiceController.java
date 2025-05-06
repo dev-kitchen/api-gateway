@@ -1,6 +1,5 @@
 package com.linkedout.apigateway.controller;
 
-import com.linkedout.common.constant.RabbitMQConstants;
 import com.linkedout.common.dto.BaseApiResponse;
 import com.linkedout.apigateway.service.MessageResponseHandlerService;
 import com.linkedout.apigateway.util.JsonUtils;
@@ -12,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 public class AuthServiceController extends ApiMessageClient {
@@ -52,7 +53,7 @@ public class AuthServiceController extends ApiMessageClient {
   @GetMapping("/health")
   public Mono<ResponseEntity<BaseApiResponse<HealthResponse>>> healthCheck(
       ServerWebExchange exchange) {
-    return processRequest(exchange, RabbitMQConstants.AUTH_API_QUEUE);
+    return processRequest(exchange);
   }
 
   @Operation(
@@ -77,7 +78,7 @@ public class AuthServiceController extends ApiMessageClient {
   @PostMapping("/google/android")
   public Mono<ResponseEntity<BaseApiResponse<GoogleOAuthResponse>>> handleGoogleAndroidLogin(
       @RequestBody @Validated GoogleOAuthRequest request, ServerWebExchange exchange) {
-    return processRequest(exchange, RabbitMQConstants.AUTH_API_QUEUE);
+    return processRequest(exchange);
   }
 
   //	@RequestMapping("/**")

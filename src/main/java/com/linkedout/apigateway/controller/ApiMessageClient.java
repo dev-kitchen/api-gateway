@@ -2,6 +2,7 @@ package com.linkedout.apigateway.controller;
 
 import com.linkedout.apigateway.service.MessageResponseHandlerService;
 import com.linkedout.apigateway.util.JsonUtils;
+import com.linkedout.common.constant.RabbitMQConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -15,8 +16,8 @@ import reactor.core.publisher.Mono;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.linkedout.common.dto.BaseApiResponse;
-import com.linkedout.common.dto.RequestData;
-import com.linkedout.common.dto.ResponseData;
+import com.linkedout.common.dto.ApiRequestData;
+import com.linkedout.common.dto.ApiResponseData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,13 +40,14 @@ public abstract class ApiMessageClient {
    * HTTP 요청을 RabbitMQ 메시지로 변환하여 전송하고 응답을 처리
    *
    * @param exchange 현재 요청/응답 컨텍스트
-   * @param queueName 메시지를 전송할 큐 이름
    * @return 마이크로서비스의 응답을 포함한 API 응답
    */
   protected <T> Mono<ResponseEntity<BaseApiResponse<T>>> processRequest(
-      ServerWebExchange exchange, String queueName) {
+      ServerWebExchange exchange) {
     ServerHttpRequest request = exchange.getRequest();
-
+    String path = request.getPath().value();
+    // 경로에 따라 적절한 라우팅 키 결정
+    String routingKey = determineRoutingKey(path);
     // 요청 본문 읽기
     return request
         .getBody()
@@ -66,19 +68,21 @@ public abstract class ApiMessageClient {
               }
 
               // 요청 데이터 객체 생성
-              RequestData requestData = new RequestData();
-              requestData.setPath(request.getPath().value());
-              requestData.setMethod(request.getMethod().name());
-              requestData.setHeaders(getHeadersMap(request.getHeaders()));
-              requestData.setBody(requestBody);
-              requestData.setQueryParams(exchange.getRequest().getQueryParams().toSingleValueMap());
+              ApiRequestData ApiRequestData = new ApiRequestData();
+              ApiRequestData.setPath(request.getPath().value());
+              ApiRequestData.setMethod(request.getMethod().name());
+              ApiRequestData.setHeaders(getHeadersMap(request.getHeaders()));
+              ApiRequestData.setBody(requestBody);
+              ApiRequestData.setQueryParams(
+                  exchange.getRequest().getQueryParams().toSingleValueMap());
 
               // 메시지 상관관계 ID 생성
               String correlationId = UUID.randomUUID().toString();
               // RabbitMQ로 메시지 전송
               rabbitTemplate.convertAndSend(
-                  queueName,
-                  requestData,
+                  RabbitMQConstants.API_EXCHANGE,
+                  routingKey,
+                  ApiRequestData,
                   message -> {
                     message.getMessageProperties().setCorrelationId(correlationId);
                     message
@@ -94,9 +98,29 @@ public abstract class ApiMessageClient {
             });
   }
 
-  /** ResponseData를 ResponseEntity<ApiResponse<?>> 응답 형식으로 변환 */
+  /**
+   * 요청 경로에 따라 적절한 라우팅 키를 결정
+   *
+   * @param path 요청 경로
+   * @return 라우팅 키
+   */
+  private String determineRoutingKey(String path) {
+    // 경로 패턴에 따라 라우팅 키 반환
+    if (path.startsWith("/api/auth")) {
+      return RabbitMQConstants.AUTH_API_ROUTING_KEY;
+      //		} else if (path.startsWith("/api/users")) {
+      //			return RabbitMQConstants.USER_ROUTING_KEY;
+    } else if (path.startsWith("/api/account")) {
+      return RabbitMQConstants.ACCOUNT_ROUTING_KEY;
+    } else {
+      // 기본값 또는 예외 처리
+      throw new IllegalArgumentException("지원하지 않는 API 경로: " + path);
+    }
+  }
+
+  /** ApiResponseData를 ResponseEntity<ApiResponse<?>> 응답 형식으로 변환 */
   protected <T> ResponseEntity<BaseApiResponse<T>> createApiResponseEntity(
-      ResponseData responseData) {
+      ApiResponseData responseData) {
     HttpStatus httpStatus = HttpStatus.valueOf(responseData.getStatusCode());
 
     // ApiResponse 객체 생성
@@ -106,8 +130,8 @@ public abstract class ApiMessageClient {
     return ResponseEntity.status(httpStatus).body(apiResponse);
   }
 
-  /** ResponseData를 API 응답 형식으로 변환 */
-  protected <T> BaseApiResponse<T> createApiResponse(ResponseData responseData) {
+  /** ApiResponseData를 API 응답 형식으로 변환 */
+  protected <T> BaseApiResponse<T> createApiResponse(ApiResponseData responseData) {
     HttpStatus httpStatus = HttpStatus.valueOf(responseData.getStatusCode());
 
     // Content-Type 확인
@@ -145,7 +169,7 @@ public abstract class ApiMessageClient {
 
   /** JSON 파싱 실패 시 또는 JSON이 아닌 경우 사용할 응답 생성 메서드 */
   private <T> BaseApiResponse<T> fallbackResponse(
-      ResponseData responseData, HttpStatus httpStatus) {
+      ApiResponseData responseData, HttpStatus httpStatus) {
     // 타입 캐스팅 추가
     @SuppressWarnings("unchecked")
     T body = (T) responseData.getBody();

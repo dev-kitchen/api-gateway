@@ -1,5 +1,8 @@
 package com.linkedout.apigateway.config;
 
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -30,20 +33,18 @@ import com.linkedout.common.constant.RabbitMQConstants;
 public class RabbitMQConfig {
 
   /**
-   * 사용자 서비스에 요청을 전송하기 위한 큐를 정의하는 Bean
+   * 마이크로서비스 통신을 위한 중앙 교환기를 정의하는 Bean
    *
-   * <p>이 큐는 API Gateway가 사용자 서비스로 요청을 전송할 때 사용됩니다. GatewayConfig에서 /api/users/** 경로의 요청을 이 큐로 전송하도록
-   * 설정되어 있습니다.
+   * <p>이 교환기는 게이트웨이와 모든 마이크로서비스 간의 메시지 라우팅을 담당합니다. 라우팅 키에 따라 메시지를 적절한 큐로 전달합니다.
    *
-   * <p>{@code @Bean}: - 이 메서드가 Spring 컨테이너에 의해 관리되는 Bean을 생성함을 나타냄 - 메서드의 반환값이 Spring 컨테이너에 등록됨
-   *
-   * @return 사용자 서비스 요청 큐
+   * @return 서비스 교환기
    */
   @Bean
-  public Queue authServiceQueue() {
-    // 첫 번째 매개변수: 큐 이름
-    // 두 번째 매개변수: durable (true로 설정하면 RabbitMQ 서버가 재시작되어도 큐가 유지됨)
-    return new Queue(RabbitMQConstants.AUTH_API_QUEUE, false);
+  public DirectExchange apiExchange() {
+    // 첫 번째 매개변수: 교환기 이름
+    // 두 번째 매개변수: durable (true로 설정하면 RabbitMQ 서버가 재시작되어도 교환기가 유지됨)
+    // 세 번째 매개변수: autoDelete (자동 삭제 여부)
+    return new DirectExchange(RabbitMQConstants.API_EXCHANGE, true, false);
   }
 
   /**
@@ -55,8 +56,15 @@ public class RabbitMQConfig {
    * @return 응답 큐
    */
   @Bean
-  public Queue responseQueue() {
+  public Queue apiGatewayQueue() {
     return new Queue(RabbitMQConstants.GATEWAY_QUEUE, false);
+  }
+
+  @Bean
+  public Binding responseBinding() {
+    return BindingBuilder.bind(apiGatewayQueue()) // GATEWAY_QUEUE
+        .to(apiExchange()) // Exchange
+        .with(RabbitMQConstants.API_RESPONSE_ROUTING_KEY); // 라우팅 키
   }
 
   /**
