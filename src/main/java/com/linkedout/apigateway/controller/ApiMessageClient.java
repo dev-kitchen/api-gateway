@@ -37,18 +37,19 @@ public abstract class ApiMessageClient {
   protected final JsonUtils jsonUtils;
 
   /**
-   * HTTP 요청을 RabbitMQ 메시지로 변환하여 전송하고 응답을 처리
+   * 마이크로서비스로의 요청을 처리합니다. 요청 세부 정보를 추출하고, 요청 경로에 기반하여 라우팅 키를 결정한 뒤 RabbitMQ 교환기로 요청을 전송합니다. 비동기적으로
+   * 응답을 기다린 후 {@link ResponseEntity}로 감싸서 {@link Mono}로 반환합니다.
    *
-   * @param exchange 현재 요청/응답 컨텍스트
-   * @return 마이크로서비스의 응답을 포함한 API 응답
+   * @param <T> {@code BaseApiResponse} 내에 포함될 응답 본문의 타입
+   * @param exchange 서버 요청과 응답 정보를 포함하는 {@link ServerWebExchange} 인스턴스
+   * @return 응답 데이터가 {@code BaseApiResponse}에 감싸져 있는 {@link ResponseEntity}를 포함하는 {@link Mono}
    */
   protected <T> Mono<ResponseEntity<BaseApiResponse<T>>> processRequest(
       ServerWebExchange exchange) {
     ServerHttpRequest request = exchange.getRequest();
     String path = request.getPath().value();
-    // 경로에 따라 적절한 라우팅 키 결정
     String routingKey = determineRoutingKey(path);
-    // 요청 본문 읽기
+
     return request
         .getBody()
         .collectList()
@@ -99,18 +100,22 @@ public abstract class ApiMessageClient {
   }
 
   /**
-   * 요청 경로에 따라 적절한 라우팅 키를 결정
+   * API 경로를 기반으로 적절한 RabbitMQ 라우팅 키를 결정합니다.
    *
-   * @param path 요청 경로
-   * @return 라우팅 키
+   * <p>이 메서드는 특정 API 경로를 해당하는 메시지 큐의 라우팅 키에 매핑합니다. 경로가 미리 정의된 패턴과 일치하지 않으면 예외가 발생합니다.
+   *
+   * @param path 라우팅 키를 결정하는데 사용되는 API 경로
+   * @return 주어진 API 경로에 해당하는 RabbitMQ 라우팅 키
+   * @throws IllegalArgumentException 제공된 경로가 미리 정의된 패턴과 일치하지 않는 경우
    */
   private String determineRoutingKey(String path) {
     // 경로 패턴에 따라 라우팅 키 반환
     if (path.startsWith("/api/auth")) {
       return RabbitMQConstants.AUTH_API_ROUTING_KEY;
-      //		} else if (path.startsWith("/api/users")) {
-      //			return RabbitMQConstants.USER_ROUTING_KEY;
+      //      		} else if (path.startsWith("/api/recipe")) {
+      //      			return RabbitMQConstants.RECIPE_API_ROUTING_KEY;
     } else if (path.startsWith("/api/account")) {
+      // todo api 요청과 서비스 요청 라우팅키 분리
       return RabbitMQConstants.ACCOUNT_ROUTING_KEY;
     } else {
       // 기본값 또는 예외 처리
@@ -118,7 +123,14 @@ public abstract class ApiMessageClient {
     }
   }
 
-  /** ApiResponseData를 ResponseEntity<ApiResponse<?>> 응답 형식으로 변환 */
+  /**
+   * ApiResponseData에 포함된 데이터로 BaseApiResponse를 포함하는 ResponseEntity를 생성합니다. HTTP 상태 코드는
+   * ApiResponseData의 상태 코드를 기반으로 설정됩니다.
+   *
+   * @param <T> BaseApiResponse 내에 포함될 응답 본문의 타입
+   * @param responseData 상태 코드, 헤더, 본문을 포함하는 API 응답 생성에 사용되는 입력 데이터
+   * @return BaseApiResponse 객체와 해당 HTTP 상태 코드를 포함하는 ResponseEntity
+   */
   protected <T> ResponseEntity<BaseApiResponse<T>> createApiResponseEntity(
       ApiResponseData responseData) {
     HttpStatus httpStatus = HttpStatus.valueOf(responseData.getStatusCode());
@@ -130,7 +142,14 @@ public abstract class ApiMessageClient {
     return ResponseEntity.status(httpStatus).body(apiResponse);
   }
 
-  /** ApiResponseData를 API 응답 형식으로 변환 */
+  /**
+   * ApiResponseData를 사용하여 BaseApiResponse 객체를 생성합니다. 이 메서드는 응답 본문이 JSON 형식인 경우 파싱을 수행합니다. JSON이 아닌
+   * 응답이나 JSON 파싱 실패의 경우 대체 응답을 생성합니다.
+   *
+   * @param <T> BaseApiResponse에 포함될 응답 객체의 타입
+   * @param responseData HTTP 상태 코드, 헤더, 본문을 포함하는 ApiResponseData 객체
+   * @return 구성된 API 응답을 나타내는 BaseApiResponse 객체
+   */
   protected <T> BaseApiResponse<T> createApiResponse(ApiResponseData responseData) {
     HttpStatus httpStatus = HttpStatus.valueOf(responseData.getStatusCode());
 
@@ -167,7 +186,15 @@ public abstract class ApiMessageClient {
     }
   }
 
-  /** JSON 파싱 실패 시 또는 JSON이 아닌 경우 사용할 응답 생성 메서드 */
+  /**
+   * API 응답 데이터와 HTTP 상태를 사용하여 대체 응답을 생성합니다. 이 메서드는 HTTP 상태의 성공 또는 실패 여부를 확인하고, 그에 따라 주어진 데이터를 사용하여
+   * 성공 또는 오류 응답을 생성합니다.
+   *
+   * @param <T> {@code BaseApiResponse}에 포함될 응답 본문의 타입
+   * @param responseData 대체 응답 생성에 사용될 상태 코드, 헤더, 본문을 포함하는 API 응답 데이터
+   * @param httpStatus 대체 응답이 성공인지 오류인지 판단하는 데 사용되는 HTTP 상태
+   * @return HTTP 상태, 본문 데이터 및 상태에서 파생된 메시지를 포함하는 {@code BaseApiResponse} 인스턴스
+   */
   private <T> BaseApiResponse<T> fallbackResponse(
       ApiResponseData responseData, HttpStatus httpStatus) {
     // 타입 캐스팅 추가
@@ -181,7 +208,12 @@ public abstract class ApiMessageClient {
     }
   }
 
-  /** HttpHeaders를 Map으로 변환 */
+  /**
+   * HttpHeaders 객체를 Map 형태로 변환합니다. 각 헤더 이름은 해당하는 값(들)과 매핑되며, 여러 값이 있는 경우 쉼표로 구분된 하나의 문자열로 연결됩니다.
+   *
+   * @param headers 변환할 헤더들을 포함하는 HttpHeaders 객체
+   * @return 헤더 이름을 키로, 헤더 값을 문자열로 가지는 Map
+   */
   protected Map<String, String> getHeadersMap(HttpHeaders headers) {
     Map<String, String> headersMap = new HashMap<>();
     headers.forEach(

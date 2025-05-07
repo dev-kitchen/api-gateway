@@ -48,18 +48,25 @@ public class RabbitMQConfig {
   }
 
   /**
-   * 마이크로서비스로부터 응답을 받기 위한 큐를 정의하는 Bean
+   * API 게이트웨이 통신을 위한 RabbitMQ 큐를 정의합니다.
    *
-   * <p>이 큐는 마이크로서비스가 API Gateway로 응답을 보낼 때 사용됩니다. ResponseHandlerService에서 @RabbitListener를 사용하여 이
-   * 큐의 메시지를 수신합니다.
+   * <p>이 큐는 API 게이트웨이와 다른 마이크로서비스 간의 비동기 메시지 전달에 사용됩니다. non-durable로 생성되어 RabbitMQ 브로커가 재시작될 때 큐가
+   * 유지되지 않습니다.
    *
-   * @return 응답 큐
+   * @return RabbitMQConstants.GATEWAY_QUEUE 이름으로 지정된 non-durable 큐의 새 인스턴스
    */
   @Bean
   public Queue apiGatewayQueue() {
     return new Queue(RabbitMQConstants.GATEWAY_QUEUE, false);
   }
 
+  /**
+   * API 게이트웨이 큐와 직접 교환기 간의 바인딩을 특정 라우팅 키를 사용하여 정의합니다.
+   *
+   * <p>이 바인딩을 통해 교환기로 전송된 메시지가 정의된 라우팅 키를 사용하여 API 게이트웨이 큐로 라우팅될 수 있습니다.
+   *
+   * @return API 게이트웨이 큐를 지정된 라우팅 키로 교환기에 바인딩하는 Binding 인스턴스
+   */
   @Bean
   public Binding responseBinding() {
     return BindingBuilder.bind(apiGatewayQueue()) // GATEWAY_QUEUE
