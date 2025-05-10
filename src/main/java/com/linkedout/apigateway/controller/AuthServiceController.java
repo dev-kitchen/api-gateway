@@ -32,6 +32,11 @@ public class AuthServiceController extends ApiMessageClient {
     super(rabbitTemplate, messageResponseHandlerService, jsonUtils);
   }
 
+  @GetMapping("/test")
+  public Mono<ResponseEntity<BaseApiResponse<HealthResponse>>> test(ServerWebExchange exchange) {
+    return sendMessage(exchange);
+  }
+
   @Operation(
       summary = "인증 서비스 상태 확인",
       description = "인증 마이크로서비스의 상태를 체크하여 서비스의 정상 동작 여부를 확인합니다.",

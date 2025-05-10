@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Import;
  * 없으면 기본값은 true로 간주됨 - 즉, 명시적으로 false로 설정하지 않는 한 RabbitMQ 기능이 활성화됨
  */
 @SpringBootApplication
-@Import(com.linkedout.common.config.AutoConfiguration.class)
 @EnableRabbit
 @ConditionalOnProperty(
     name = "spring.rabbitmq.enabled",
