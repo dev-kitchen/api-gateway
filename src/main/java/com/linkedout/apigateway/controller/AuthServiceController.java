@@ -54,7 +54,7 @@ public class AuthServiceController extends ApiMessageClient {
   @GetMapping("/health")
   public Mono<ResponseEntity<BaseApiResponse<HealthResponse>>> healthCheck(
       ServerWebExchange exchange) {
-    return processRequest(exchange);
+    return sendMessage(exchange);
   }
 
   @Operation(
@@ -79,7 +79,7 @@ public class AuthServiceController extends ApiMessageClient {
   @PostMapping("/google/android")
   public Mono<ResponseEntity<BaseApiResponse<GoogleOAuthResponse>>> handleGoogleAndroidLogin(
       @RequestBody @Validated GoogleOAuthRequest request, ServerWebExchange exchange) {
-    return processRequest(exchange);
+    return sendMessage(exchange);
   }
 
   //	@RequestMapping("/**")

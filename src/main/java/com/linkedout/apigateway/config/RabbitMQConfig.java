@@ -71,7 +71,7 @@ public class RabbitMQConfig {
   public Binding responseBinding() {
     return BindingBuilder.bind(apiGatewayQueue()) // GATEWAY_QUEUE
         .to(apiExchange()) // Exchange
-        .with(RabbitMQConstants.API_RESPONSE_ROUTING_KEY); // 라우팅 키
+        .with(RabbitMQConstants.API_GATEWAY_ROUTING_KEY); // 라우팅 키
   }
 
   /**
