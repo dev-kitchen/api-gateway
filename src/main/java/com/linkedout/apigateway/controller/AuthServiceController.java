@@ -1,12 +1,13 @@
 package com.linkedout.apigateway.controller;
 
 import com.linkedout.common.dto.BaseApiResponse;
-import com.linkedout.apigateway.service.MessageResponseHandlerService;
-import com.linkedout.apigateway.util.JsonUtils;
 import com.linkedout.common.dto.HealthResponse;
 import com.linkedout.common.dto.auth.oauth.google.GoogleOAuthRequest;
 import com.linkedout.common.dto.auth.oauth.google.GoogleOAuthResponse;
+import com.linkedout.common.messaging.ApiMessageClient;
+import com.linkedout.common.messaging.ApiMessageResponseHandler;
 import com.linkedout.common.schema.GoogleOAuthResponseSchema;
+import com.linkedout.common.util.JsonUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,7 +27,7 @@ public class AuthServiceController extends ApiMessageClient {
 
   public AuthServiceController(
       RabbitTemplate rabbitTemplate,
-      MessageResponseHandlerService messageResponseHandlerService,
+      ApiMessageResponseHandler messageResponseHandlerService,
       JsonUtils jsonUtils) {
     super(rabbitTemplate, messageResponseHandlerService, jsonUtils);
   }

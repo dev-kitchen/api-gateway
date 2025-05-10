@@ -11,9 +11,4 @@ import org.springframework.context.annotation.Configuration;
  * <p>이 클래스는 {@code @Configuration} 어노테이션이 적용되어 있어서 스프링 프레임워크가 관리하는 빈 정의들을 포함하고 있음을 나타냅니다.
  */
 @Configuration
-public class AppConfig {
-  @Bean
-  public ErrorResponseBuilder errorResponseBuilder(ObjectMapper objectMapper) {
-    return new ErrorResponseBuilder(objectMapper);
-  }
-}
+public class AppConfig {}

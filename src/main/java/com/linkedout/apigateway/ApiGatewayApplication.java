@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.context.annotation.Import;
 
 /**
  * API Gateway 애플리케이션의 메인 클래스
@@ -23,6 +24,7 @@ import org.springframework.amqp.rabbit.annotation.EnableRabbit;
  * 없으면 기본값은 true로 간주됨 - 즉, 명시적으로 false로 설정하지 않는 한 RabbitMQ 기능이 활성화됨
  */
 @SpringBootApplication
+@Import(com.linkedout.common.config.AutoConfiguration.class)
 @EnableRabbit
 @ConditionalOnProperty(
     name = "spring.rabbitmq.enabled",

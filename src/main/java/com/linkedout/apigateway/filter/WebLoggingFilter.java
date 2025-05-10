@@ -91,7 +91,7 @@ public class WebLoggingFilter implements WebFilter, Ordered {
       String path,
       String requestId) {
     long startTime = System.currentTimeMillis();
-    logger.info(String.valueOf(exchange));
+
     return chain
         .filter(exchange)
         .doFinally(

@@ -1,7 +1,8 @@
 package com.linkedout.apigateway.controller;
 
-import com.linkedout.apigateway.service.MessageResponseHandlerService;
-import com.linkedout.apigateway.util.JsonUtils;
+import com.linkedout.common.messaging.ApiMessageClient;
+import com.linkedout.common.messaging.ApiMessageResponseHandler;
+import com.linkedout.common.util.JsonUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +21,7 @@ public class RecipeServiceController extends ApiMessageClient {
 
   public RecipeServiceController(
       RabbitTemplate rabbitTemplate,
-      MessageResponseHandlerService messageResponseHandlerService,
+      ApiMessageResponseHandler messageResponseHandlerService,
       JsonUtils jsonUtils) {
     super(rabbitTemplate, messageResponseHandlerService, jsonUtils);
   }
