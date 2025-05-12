@@ -28,6 +28,8 @@ public class GatewayController {
             // 			content = @Content(schema = @Schema(implementation = HealthResponse.class))
             )
       })
+  //	@PreAuthorize("hasRole('ADMIN')")
+  //	@PreAuthorize("hasRole('USER')")
   @GetMapping("/api/health")
   public Mono<ResponseEntity<Map<String, Object>>> healthCheck() {
     Map<String, Object> response = new HashMap<>();
