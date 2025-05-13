@@ -23,7 +23,13 @@ public class SecurityConfig {
     return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
         .authorizeExchange(
             exchanges ->
-                exchanges.pathMatchers("/api/auth/**").permitAll().anyExchange().authenticated())
+                exchanges
+                    .pathMatchers("/api/auth/**")
+                    .permitAll()
+                    .pathMatchers("/actuator/**")
+                    .permitAll() // 액추에이터 경로도 허용
+                    .anyExchange()
+                    .authenticated())
         .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
         .build();
   }

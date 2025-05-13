@@ -37,4 +37,12 @@ public class GatewayController {
 
     return Mono.just(ResponseEntity.ok(response));
   }
+
+  @GetMapping("/actuator/prometheus")
+  public Mono<ResponseEntity<Map<String, Object>>> prometheusHealthCheck() {
+    Map<String, Object> response = new HashMap<>();
+    response.put("status", 200);
+
+    return Mono.just(ResponseEntity.ok(response));
+  }
 }

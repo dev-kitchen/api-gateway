@@ -74,7 +74,9 @@ dependencies {
 	// 비동기, 논블로킹 HTTP 요청 처리를 위한 리액티브 웹 프레임워크
 	// Mono/Flux 등의 리액티브 타입을 사용할 수 있게 해줌
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 
 	// Lombok - 반복적인 코드(게터, 세터, 생성자 등)를 줄여주는 애노테이션 프로세서
 	// compileOnly로 설정하여 컴파일 시에만 사용되고 런타임에는 포함되지 않음
@@ -110,11 +112,7 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 
-	// 운영 환경에서 필요한 경우 주석 해제하고 설정 추가
-	// implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	// implementation 'org.springframework.boot:spring-boot-starter-data-rest'
-	// implementation 'org.postgresql:postgresql:42.7.2'
-
+	implementation 'net.logstash.logback:logstash-logback-encoder:7.0.1'
 }
 
 def getVersionName = { ->
