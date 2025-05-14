@@ -1,3 +1,5 @@
+## [1.0.6](https://github.com/dev-kitchen/api-gateway/compare/v1.0.5...v1.0.6) (2025-05-14)
+
 ## [1.0.5](https://github.com/dev-kitchen/api-gateway/compare/v1.0.4...v1.0.5) (2025-05-10)
 
 ## [1.0.4](https://github.com/dev-kitchen/api-gateway/compare/v1.0.3...v1.0.4) (2025-05-06)
