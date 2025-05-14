@@ -3,7 +3,8 @@ package com.linkedout.apigateway.controller;
 import com.linkedout.common.dto.BaseApiResponse;
 import com.linkedout.common.dto.HealthResponse;
 import com.linkedout.common.messaging.ApiMessageClient;
-import com.linkedout.common.messaging.ApiMessageResponseHandler;
+import com.linkedout.common.messaging.ServiceIdentifier;
+import com.linkedout.common.messaging.ServiceMessageResponseHandler;
 import com.linkedout.common.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -24,21 +25,26 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/recipes")
 public class RecipeServiceController extends ApiMessageClient {
 
-  public RecipeServiceController(
-      RabbitTemplate rabbitTemplate,
-      ApiMessageResponseHandler messageResponseHandlerService,
-      JsonUtils jsonUtils) {
-    super(rabbitTemplate, messageResponseHandlerService, jsonUtils);
-  }
+	public RecipeServiceController(
+		RabbitTemplate rabbitTemplate,
+		JsonUtils jsonUtils,
+		ServiceMessageResponseHandler serviceMessageResponseHandler,
+		ServiceIdentifier serviceIdentifier) {
+		super(
+			rabbitTemplate,
+			jsonUtils,
+			serviceMessageResponseHandler,
+			serviceIdentifier);
+	}
 
-  @GetMapping("/health")
-  public Mono<ResponseEntity<BaseApiResponse<HealthResponse>>> health(ServerWebExchange exchange) {
-    return sendMessage(exchange);
-  }
+	@GetMapping("/health")
+	public Mono<ResponseEntity<BaseApiResponse<HealthResponse>>> health(ServerWebExchange exchange) {
+		return sendMessage(exchange);
+	}
 
-  //	@RequestMapping("/**")
-  //	public Mono<ResponseEntity<ApiResponse<?>>> handleRecipeServiceRequest(ServerWebExchange
-  // exchange) {
-  //		return processRequest(exchange, RECIPE_QUEUE);
-  //	}
+	//	@RequestMapping("/**")
+	//	public Mono<ResponseEntity<ApiResponse<?>>> handleRecipeServiceRequest(ServerWebExchange
+	// exchange) {
+	//		return processRequest(exchange, RECIPE_QUEUE);
+	//	}
 }
