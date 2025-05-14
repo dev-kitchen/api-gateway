@@ -19,15 +19,7 @@ public class GatewayController {
   @Operation(
       summary = "시스템 상태 확인",
       description = "MSA 구성에서 유일한 HTTP 통신 통로인 API-Gateway의 현재 상태를 제공합니다.")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "서비스 정상"
-            // todo 응답 dto
-            // 			content = @Content(schema = @Schema(implementation = HealthResponse.class))
-            )
-      })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "서비스 정상")})
   //	@PreAuthorize("hasRole('ADMIN')")
   //	@PreAuthorize("hasRole('USER')")
   @GetMapping("/api/health")

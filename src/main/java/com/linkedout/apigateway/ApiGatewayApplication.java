@@ -4,7 +4,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
-import org.springframework.context.annotation.Import;
 
 /**
  * API Gateway 애플리케이션의 메인 클래스

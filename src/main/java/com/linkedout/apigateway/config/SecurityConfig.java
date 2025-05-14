@@ -27,6 +27,8 @@ public class SecurityConfig {
                     .pathMatchers("/api/auth/**")
                     .permitAll()
                     .pathMatchers("/actuator/**")
+                    .permitAll()
+                    .pathMatchers("/api/recipes/**")
                     .permitAll() // 액추에이터 경로도 허용
                     .anyExchange()
                     .authenticated())
