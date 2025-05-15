@@ -28,8 +28,8 @@ public class SecurityConfig {
                     .permitAll()
                     .pathMatchers("/actuator/**")
                     .permitAll()
-                    .pathMatchers("/api/recipes/**")
-                    .permitAll() // 액추에이터 경로도 허용
+//                    .pathMatchers("/api/recipes/**")
+//                    .permitAll()
                     .anyExchange()
                     .authenticated())
         .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)

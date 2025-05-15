@@ -1,13 +1,10 @@
 package com.linkedout.apigateway.controller;
 
-import com.linkedout.common.dto.BaseApiResponse;
-import com.linkedout.common.dto.HealthResponse;
-import com.linkedout.common.dto.auth.oauth.google.GoogleOAuthRequest;
-import com.linkedout.common.dto.auth.oauth.google.GoogleOAuthResponse;
 import com.linkedout.common.messaging.ApiMessageClient;
 import com.linkedout.common.messaging.ServiceIdentifier;
 import com.linkedout.common.messaging.ServiceMessageResponseHandler;
-import com.linkedout.common.schema.GoogleOAuthResponseSchema;
+import com.linkedout.common.model.dto.BaseApiResponse;
+import com.linkedout.common.model.dto.HealthResponse;
 import com.linkedout.common.util.JsonUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -43,9 +39,14 @@ public class AuthServiceController extends ApiMessageClient {
 		return sendMessage(exchange);
 	}
 
+	@GetMapping("/testToken")
+	public Mono<ResponseEntity<BaseApiResponse<HealthResponse>>> testToken(ServerWebExchange exchange) {
+		return sendMessage(exchange);
+	}
+
 	@Operation(
-		summary = "인증 서비스 상태 확인",
-		description = "인증 마이크로서비스의 상태를 체크하여 서비스의 정상 동작 여부를 확인합니다.",
+		summary = "Auth 서비스 상태 확인",
+		description = "Auth 마이크로서비스의 상태를 체크하여 서비스의 정상 동작 여부를 확인합니다.",
 		responses = {
 			@ApiResponse(
 				responseCode = "200",
@@ -68,28 +69,4 @@ public class AuthServiceController extends ApiMessageClient {
 		return sendMessage(exchange);
 	}
 
-	@Operation(
-		summary = "구글 OAuth 안드로이드 로그인",
-		description = "안드로이드 앱에서 전달받은 구글 OAuth 토큰을 검증하고 회원가입/로그인을 처리합니다.",
-		requestBody =
-		@io.swagger.v3.oas.annotations.parameters.RequestBody(
-			description = "구글 OAuth 인증 요청",
-			content =
-			@Content(
-				mediaType = "application/json",
-				schema = @Schema(implementation = GoogleOAuthRequest.class))),
-		responses = {
-			@ApiResponse(
-				responseCode = "201",
-				description = "로그인/회원가입 성공",
-				content =
-				@Content(
-					mediaType = "application/json",
-					schema = @Schema(implementation = GoogleOAuthResponseSchema.class))),
-		})
-	@PostMapping("/google/android")
-	public Mono<ResponseEntity<BaseApiResponse<GoogleOAuthResponse>>> handleGoogleAndroidLogin(
-		@RequestBody @Validated GoogleOAuthRequest request, ServerWebExchange exchange) {
-		return sendMessage(exchange);
-	}
 }
