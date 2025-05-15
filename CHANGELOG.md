@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/dev-kitchen/api-gateway/compare/v1.0.7...v1.1.0) (2025-05-15)
+
+
+### Features
+
+* 새로운 엔드 포인트 및 보안 구성 업데이트 ([401fcbf](https://github.com/dev-kitchen/api-gateway/commit/401fcbf1943e93baae9712e074512ef98672238d))
+
 ## [1.0.7](https://github.com/dev-kitchen/api-gateway/compare/v1.0.6...v1.0.7) (2025-05-14)
 
 ## [1.0.6](https://github.com/dev-kitchen/api-gateway/compare/v1.0.5...v1.0.6) (2025-05-14)
