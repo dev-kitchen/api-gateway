@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/dev-kitchen/api-gateway/compare/v1.1.0...v1.2.0) (2025-05-16)
+
+
+### Features
+
+* 이미지 업로드 기능 ([340f376](https://github.com/dev-kitchen/api-gateway/commit/340f37637ff47511fdc8fbca420dadcccb0e463b))
+
 # [1.1.0](https://github.com/dev-kitchen/api-gateway/compare/v1.0.7...v1.1.0) (2025-05-15)
 
 
