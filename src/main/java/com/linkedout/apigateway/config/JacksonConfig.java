@@ -2,8 +2,11 @@ package com.linkedout.apigateway.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.text.SimpleDateFormat;
 
 /**
  * Jackson JSON 처리 관련 설정 클래스
@@ -24,14 +27,19 @@ public class JacksonConfig {
    */
   @Bean
   public ObjectMapper objectMapper() {
-    ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper objectMapper = new ObjectMapper();
+
+		objectMapper.registerModule(new JavaTimeModule());
 
     // 날짜/시간 값을 ISO-8601 형식으로 직렬화하도록 설정
-    mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+		objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
     // 빈 Bean에 대해 오류를 발생시키지 않도록 설정
-    mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
-    return mapper;
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		objectMapper.setDateFormat(dateFormat);
+
+    return objectMapper;
   }
 }

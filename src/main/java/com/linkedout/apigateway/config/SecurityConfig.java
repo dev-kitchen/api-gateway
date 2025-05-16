@@ -28,10 +28,12 @@ public class SecurityConfig {
                     .permitAll()
                     .pathMatchers("/actuator/**")
                     .permitAll()
-//                    .pathMatchers("/api/recipes/**")
-//                    .permitAll()
+										.pathMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**", "/api-docs/**",
+											"/api-docs/swagger-config").permitAll()
                     .anyExchange()
                     .authenticated())
+			.httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)  // 기본 인증 비활성화
+			.formLogin(ServerHttpSecurity.FormLoginSpec::disable)  // 폼 로그인 비활성화
         .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
         .build();
   }

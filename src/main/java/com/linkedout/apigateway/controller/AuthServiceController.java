@@ -4,12 +4,12 @@ import com.linkedout.common.messaging.ApiMessageClient;
 import com.linkedout.common.messaging.ServiceIdentifier;
 import com.linkedout.common.messaging.ServiceMessageResponseHandler;
 import com.linkedout.common.model.dto.BaseApiResponse;
-import com.linkedout.common.model.dto.HealthResponse;
 import com.linkedout.common.util.JsonUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +18,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @Slf4j
+@Tag(name = "Auth", description = "인증 서비스 앤드포인트")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthServiceController extends ApiMessageClient {
@@ -34,13 +35,10 @@ public class AuthServiceController extends ApiMessageClient {
 			serviceIdentifier);
 	}
 
-	@GetMapping("/test")
-	public Mono<ResponseEntity<BaseApiResponse<HealthResponse>>> test(ServerWebExchange exchange) {
-		return sendMessage(exchange);
-	}
-
+	//	@PreAuthorize("hasRole('ADMIN')")
+	//	@PreAuthorize("hasRole('USER')")
 	@GetMapping("/testToken")
-	public Mono<ResponseEntity<BaseApiResponse<HealthResponse>>> testToken(ServerWebExchange exchange) {
+	public Mono<ResponseEntity<BaseApiResponse<String>>> testToken(ServerWebExchange exchange) {
 		return sendMessage(exchange);
 	}
 
@@ -55,16 +53,9 @@ public class AuthServiceController extends ApiMessageClient {
 				@Content(
 					mediaType = "application/json",
 					schema = @Schema(implementation = BaseApiResponse.class))),
-			@ApiResponse(
-				responseCode = "503",
-				description = "서비스 이용 불가",
-				content =
-				@Content(
-					mediaType = "application/json",
-					schema = @Schema(implementation = BaseApiResponse.class)))
 		})
 	@GetMapping("/health")
-	public Mono<ResponseEntity<BaseApiResponse<HealthResponse>>> healthCheck(
+	public Mono<ResponseEntity<BaseApiResponse<String>>> healthCheck(
 		ServerWebExchange exchange) {
 		return sendMessage(exchange);
 	}

@@ -13,28 +13,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@Tag(name = "Health Chek", description = "API-Gateway 상태 확인 엔드포인트")
+@Tag(name = "Gateway", description = "API-Gateway 엔드포인트")
 public class GatewayController {
 
-  @Operation(
-      summary = "시스템 상태 확인",
-      description = "MSA 구성에서 유일한 HTTP 통신 통로인 API-Gateway의 현재 상태를 제공합니다.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "서비스 정상")})
-  //	@PreAuthorize("hasRole('ADMIN')")
-  //	@PreAuthorize("hasRole('USER')")
-  @GetMapping("/api/health")
-  public Mono<ResponseEntity<Map<String, Object>>> healthCheck() {
-    Map<String, Object> response = new HashMap<>();
-    response.put("status", 200);
 
-    return Mono.just(ResponseEntity.ok(response));
-  }
+	@Operation(
+		summary = "API-Gateway Prometheus 헬스 체크",
+		description = "API-Gateway 시스템 모니터링을 위한 프로메테우스 메트릭을 제공합니다."
+	)
+	@GetMapping("/actuator/prometheus")
+	public Mono<ResponseEntity<Map<String, Object>>> prometheusHealthCheck() {
+		Map<String, Object> response = new HashMap<>();
+		response.put("status", 200);
 
-  @GetMapping("/actuator/prometheus")
-  public Mono<ResponseEntity<Map<String, Object>>> prometheusHealthCheck() {
-    Map<String, Object> response = new HashMap<>();
-    response.put("status", 200);
-
-    return Mono.just(ResponseEntity.ok(response));
-  }
+		return Mono.just(ResponseEntity.ok(response));
+	}
 }
